@@ -29,17 +29,21 @@ class FeatureMixingLayer(layers.Layer):
         # get batch_size
         batch_size = tf.shape(inputs)[0]
 
-        # add index
-        index = tf.linspace(1.0 / self.length, 1.0, self.length)
-        index = tf.reshape(index, (1, self.length, 1))
-        index = tf.tile(index, [batch_size, 1, 1])
-        
-        # calculate similarity
-        mean_vector = tf.reduce_mean(inputs, axis=1, keepdims=True)
-        similarity = tf.matmul(inputs, mean_vector, transpose_b=True)
+        # calculate sin and cos waves for different periods
+        periods = [1/4, 1/2, 1, 2, 4, 8, 16, 32, 64, 128]
+        wave_index = []
+        for period in periods:
+            radians = tf.linspace(0.0, 2 * tf.constant(np.pi) * period, self.length)
+            sin_wave = tf.sin(radians)
+            cos_wave = tf.cos(radians)
+            wave_index.append(tf.reshape(sin_wave, (1, self.length, 1)))
+            wave_index.append(tf.reshape(cos_wave, (1, self.length, 1)))
 
-        # concat index and similarity
-        input_custom = tf.concat([inputs, similarity], axis=-1)
+        wave_index = tf.concat(wave_index, axis=-1)  # Concatenate all waves
+        wave_index = tf.tile(wave_index, [batch_size, 1, 1])
+
+        # concat wave index and similarity
+        input_custom = tf.concat([inputs, wave_index], axis=-1)
 
         return input_custom
 
