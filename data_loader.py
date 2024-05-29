@@ -22,10 +22,11 @@ import pandas as pd
 from sklearn.preprocessing import StandardScaler
 import tensorflow as tf
 import pdb
+from sklearn.cluster import KMeans
+
 
 DATA_DIR = 'gs://time_series_datasets'
 LOCAL_CACHE_DIR = './dataset/'
-
 
 class TSFDataLoader:
   """Generate data loader from raw data."""
