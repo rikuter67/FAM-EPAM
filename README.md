@@ -150,7 +150,6 @@ If you have any questions or concerns, please contact us: s256279@wakayama-u.ac.
 If you find this repo useful in your research, please consider citing our paper as follows:
 
 ```plaintext
-
 @inproceedings{yamazono2024tsmixer,
 title={Permutation Dependent Feature Mixing for Multivariate Time Series Forecasting},
 author={R. Yamazono and H. Hachiya},
