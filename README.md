@@ -29,7 +29,7 @@ To run the experiments with tuned hyperparameters, follow these steps:
 
 1. Clone the repository:
     ```bash
-    git clone https://github.com/rikuter67/EPAM_and_FAM_FeatureMixing_TSMixer.git
+    git clone https://github.com/rikuter67/EPAM_and_FAM_in_TSMixer.git
     cd EPAM_and_FAM_FeatureMixing_TSMixer
     ```
 
@@ -93,8 +93,12 @@ The repository is organized as follows:
 ├── run_tuned_hparam.sh  # Script to run experiments with tuned hyperparameters
 ├── run_tuned_hparam_1.sh  # Additional script for running experiments
 └── utils.py  # Utility functions
+```
 
 ## Explanation of Key Files and Directories
+
+```plaintext
+
 - README.md: This file, providing an overview of the project and instructions for setup and usage.
 - __pycache__: Directory containing Python bytecode files for performance optimization.
 - checkpoints: Directory where trained model checkpoints are saved. Each checkpoint corresponds to a different dataset and prediction length.
@@ -107,6 +111,7 @@ The repository is organized as follows:
 - run.py: Main script to execute the model training and evaluation.
 - run_tuned_hparam.sh: Script to run experiments with predefined hyperparameters.
 - utils.py: Utility functions used throughout the project.
+```
 
 ## Results
 - The results of the experiments, including the trained model checkpoints, will be stored in the checkpoints directory.
