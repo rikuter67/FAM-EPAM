@@ -1,0 +1,12 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Data directories
+dataset/
+checkpoints/
+graph/
+models/__pycache__/
+result.csv
+model.png
