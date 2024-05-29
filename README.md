@@ -23,41 +23,6 @@ The following visualizations illustrate the effectiveness of our enhanced featur
 ![Visualization 1](https://github.com/rikuter67/EPAM_and_FAM_FeatureMixing_TSMixer/main/pic/visualization1.png)
 ![Visualization 2](https://github.com/rikuter67/EPAM_and_FAM_FeatureMixing_TSMixer/main/pic/visualization2.png)
 
-## Getting Started
-
-We separate our codes for supervised learning and self-supervised learning into two folders: `supervised_learning` and `self_supervised_learning`. Please choose the one that you want to work with.
-
-### Supervised Learning
-
-1. Install requirements.
-    ```bash
-    pip install -r requirements.txt
-    ```
-
-2. Download data. You can download all the datasets from [Autoformer](https://drive.google.com/drive/folders/1ZOYpTUa82_jCcxIdTmyr0LXQfvaM9vIy). Create a separate folder `./dataset` and put all the CSV files in the directory.
-
-3. Training. All the scripts are in the directory `./scripts/PatchTST`. The default model is TSMixer with FAM and EPAM. For example, if you want to get the multivariate forecasting results for the weather dataset, just run the following command, and you can open `./result.txt` to see the results once the training is done:
-    ```bash
-    sh ./scripts/PatchTST/weather.sh
-    ```
-
-You can adjust the hyperparameters based on your needs (e.g., different patch lengths, different look-back windows, and prediction lengths). We also provide codes for the baseline models.
-
-### Self-supervised Learning
-
-1. Follow the first 2 steps above.
-
-2. Pre-training: The script `patchtst_pretrain.py` is to train the TSMixer with FAM and EPAM. To run the code with a single GPU on ettm1, just run the following command:
-    ```bash
-    python patchtst_pretrain.py --dset ettm1 --mask_ratio 0.4
-    ```
-    The model will be saved to the `saved_model` folder for the downstream tasks. There are several other parameters that can be set in the `patchtst_pretrain.py` script.
-
-3. Fine-tuning: The script `patchtst_finetune.py` is for the fine-tuning step. Either linear probing or fine-tuning the entire network can be applied.
-    ```bash
-    python patchtst_finetune.py --dset ettm1 --pretrained_model <model_name>
-    ```
-
 ## Running the Experiments
 
 To run the experiments with tuned hyperparameters, follow these steps:
@@ -81,6 +46,71 @@ To run the experiments with tuned hyperparameters, follow these steps:
     ```
 
 This will execute the experiments with the specified datasets and prediction lengths, using the tuned hyperparameters defined in the script.
+
+
+
+### File Structure
+
+The repository is organized as follows:
+
+```plaintext
+.
+├── README.md
+├── __pycache__
+│   ├── data_loader.cpython-311.pyc
+│   ├── data_loader.cpython-38.pyc
+│   ├── data_loader.cpython-39.pyc
+│   ├── graph.cpython-39.pyc
+│   └── utils.cpython-39.pyc
+├── checkpoints
+│   ├── <model_checkpoints>  # Model checkpoints for different datasets and prediction lengths
+├── data_loader.py  # Script to load and preprocess the data
+├── dataset
+│   ├── ETTh1.csv
+│   ├── ETTh2.csv
+│   ├── ETTm1.csv
+│   ├── ETTm2.csv
+│   ├── all_six_datasets.zip
+│   ├── electricity.csv
+│   ├── exchange_rate.csv
+│   ├── national_illness.csv
+│   ├── traffic.csv
+│   └── weather.csv
+├── graph.py  # Script for plotting and visualization
+├── models
+│   ├── __init__.py
+│   ├── cnn.py
+│   ├── fmix_only.py
+│   ├── full_linear.py
+│   ├── linear.py
+│   ├── rev_in.py
+│   ├── tmix_only.py
+│   ├── tsmixer.py
+│   └── tsmixer_rev_in.py
+├── requirements.txt  # Required dependencies
+├── result.csv  # File to store the results
+├── run.py  # Main script to run the model
+├── run_tuned_hparam.sh  # Script to run experiments with tuned hyperparameters
+├── run_tuned_hparam_1.sh  # Additional script for running experiments
+└── utils.py  # Utility functions
+
+## Explanation of Key Files and Directories
+- README.md: This file, providing an overview of the project and instructions for setup and usage.
+- __pycache__: Directory containing Python bytecode files for performance optimization.
+- checkpoints: Directory where trained model checkpoints are saved. Each checkpoint corresponds to a different dataset and prediction length.
+- data_loader.py: Script responsible for loading and preprocessing the dataset.
+- dataset: Directory where datasets should be placed. Contains CSV files for various datasets used in the experiments.
+- graph.py: Script for generating plots and visualizations of the results.
+- models: Directory containing the implementation of different model variants, including TSMixer and its enhanced versions with FAM and EPAM.
+- requirements.txt: File listing the Python dependencies required for running the code.
+- result.csv: File where detailed results of each run are appended.
+- run.py: Main script to execute the model training and evaluation.
+- run_tuned_hparam.sh: Script to run experiments with predefined hyperparameters.
+- utils.py: Utility functions used throughout the project.
+
+## Results
+- The results of the experiments, including the trained model checkpoints, will be stored in the checkpoints directory.
+- Detailed results for each run will be appended to the result.csv file.
 
 ## Acknowledgement
 
