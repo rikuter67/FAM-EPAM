@@ -8,6 +8,20 @@
 
 :star2: **Event Proximity-Aware Mixer (EPAM)**: Focuses on the temporal proximity of events, enabling the model to better understand and predict time-dependent relationships.
 
+### Model Architectures
+
+The following images provide visual representations of the TSMixer model, as well as the EPAM and FAM components.
+
+![TSMixer Model](https://github.com/rikuter67/EPAM_and_FAM_FeatureMixing_TSMixer/pic/tsmixer_model.png)
+*Figure 1: The architecture of the baseline TSMixer model.*
+
+![EPAM](https://github.com/rikuter67/EPAM_and_FAM_FeatureMixing_TSMixer/pic/epam.png)
+*Figure 2: The structure of the Event Proximity-Aware Mixer (EPAM).*
+
+![FAM](https://github.com/rikuter67/EPAM_and_FAM_FeatureMixing_TSMixer/pic/fam.png)
+*Figure 3: The structure of the Frequency-Aware Mixer (FAM).*
+
+
 ## Results
 
 ### Performance Comparison
