@@ -91,7 +91,6 @@ The repository is organized as follows:
 ├── result.csv  # File to store the results
 ├── run.py  # Main script to run the model
 ├── run_tuned_hparam.sh  # Script to run experiments with tuned hyperparameters
-├── run_tuned_hparam_1.sh  # Additional script for running experiments
 └── utils.py  # Utility functions
 ```
 
@@ -141,7 +140,7 @@ If you find this repo useful in your research, please consider citing our paper 
 @inproceedings{yamazono2024tsmixer,
 title={Permutation Dependent Feature Mixing for Multivariate Time Series Forecasting},
 author={R. Yamazono and H. Hachiya},
-booktitle={ECML 2024},
+booktitle={ECML PKDD 2024},
 year={2024}
 }
 ```
