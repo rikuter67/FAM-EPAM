@@ -1,7 +1,6 @@
 import matplotlib.pyplot as plt
 import tensorflow as tf
 import seaborn as sns
-import pdb
 import numpy as np
 import os
 from models.tsmixer import ResBlock
@@ -31,10 +30,11 @@ def predictions_with_history(test_data, data, model, seq_len, pred_len, save_pat
         # モデルによる予測
         pred_y = model.predict(test_x)
 
-        plt.figure(figsize=(10, 8))
+        # plt.figure(figsize=(14, 10))
+        plt.rcParams.update({'font.size': 11})
 
         for i, feature_index in enumerate(selected_feature_indices):
-            plt.subplot(len(selected_feature_names), 1, i + 1)
+            ax = plt.subplot(len(selected_feature_names), 1, i + 1)
             # 履歴と真値を連続してプロット
             full_history = tf.concat([test_x[0, :, feature_index], test_y[0, :, feature_index]], axis=0)
             plt.plot(full_history, label=f'{selected_feature_names[i]} - History & True', linewidth=3)
@@ -43,9 +43,13 @@ def predictions_with_history(test_data, data, model, seq_len, pred_len, save_pat
             plt.axvline(x=seq_len, color='gray', linewidth=1.0)
             # plt.title(selected_feature_names[i], fontsize=28)
             # plt.legend(loc='upper left')
+            # ax.spines['top'].set_linewidth(2)
+            # ax.spines['right'].set_linewidth(2)
+            # ax.spines['bottom'].set_linewidth(2)
+            # ax.spines['left'].set_linewidth(2)
 
         plt.tight_layout()
-        new_save_path = f'{save_path}_{batch_index}.pdf'
+        new_save_path = f'{save_path}_{batch_index}.png'
         plt.savefig(new_save_path)
         plt.close()
 
@@ -67,34 +71,26 @@ def history(history, save_path='graph/train_valid.png'):
 
 class PlotLayerOutputCallback(tf.keras.callbacks.Callback):
     def __init__(self, layer_names, test_data):
-        super(PlotLayerOutputCallback, self).__init__()
-        self.layer_names = layer_names  # 層名のリスト
+        super().__init__()
+        self.layer_names = layer_names
         self.test_data = test_data
 
-    def on_test_end(self, logs=None):
+    def on_predict_end(self, logs=None):
         for layer_name in self.layer_names:
-            layer_output_model = tf.keras.Model(inputs=self.model.input,
+            layer_output_model = tf.keras.Model(inputs=self.model.input, 
                                                 outputs=self.model.get_layer(layer_name).output)
             layer_output = layer_output_model.predict(self.test_data)
             self.plot(layer_output, layer_name)
 
-    def plot(self, data, name): # arg.data, arg.supplement?
-        labels = ['HUFL', 'HULL', 'MUFL', 'MULL', 'LUFL', 'LULL', 'OT']  # 凡例のラベル
-        num_samples = data.shape[0]  # サンプルの数
-        num_features = data.shape[2]  # 特徴の数（この場合は7）
-        # 最初のバッチのデータを取得
-        first_batch_data = data[0, :, :]  # 形状は (512, 7)
+    def plot(self, data, name):
+        plt.figure(figsize=(10, 4))
+        for i in range(data.shape[-1]):
+            plt.plot(data[0, :, i])
+            plt.title(f'Output of layer {name}')
+            plt.xlabel('Time Step')
+            plt.ylabel('Output')
+            plt.legend([f'Feature {i + 1}'])
 
-        plt.figure(figsize=(10, 4 * num_features))
-
-        for feature_index in range(num_features):
-            plt.subplot(num_features, 1, feature_index + 1)
-            plt.plot(first_batch_data[:, feature_index])
-            plt.title(f'{labels[feature_index]}')  # ラベルをタイトルに追加
-            plt.ylim(-8, 8)
-            plt.legend([labels[feature_index]], loc='upper right')  # ラベルを凡例に追加
-
-        plt.tight_layout()
         plt.savefig(f'graph/inner_layer/{name}.png')
         plt.close()
 
@@ -149,9 +145,9 @@ def plot_mse_per_time_step(model, test_data, pred_len, supplement, save_path):
     # 折れ線グラフのプロット
     plt.figure(figsize=(10, 6))
 
-    if supplement == 'frequence':
+    if supplement == 'FAM':
         plt.plot(range(pred_len), mse_per_timepoint, marker='o', color='blue')
-    elif supplement == 'similarity':
+    elif supplement == 'EPAM':
         plt.plot(range(pred_len), mse_per_timepoint, marker='o', color='orange')
     else:
         plt.plot(range(pred_len), mse_per_timepoint, marker='o', color='gray')

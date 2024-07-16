@@ -31,17 +31,19 @@ import models
 import numpy as np
 import pandas as pd
 import tensorflow as tf
+import random
 
 import graph
 from graph import PlotLayerOutputCallback
 from graph import ResBlockIOCallback
-import pdb
 from sklearn.cluster import KMeans
 import math
 
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'  # FATAL
 logging.getLogger('tensorflow').setLevel(logging.FATAL)
 
+import matplotlib.pyplot as plt
+import numpy as np
 
 def parse_args():
   """Parse the arguments for experiment configuration."""
@@ -183,15 +185,15 @@ def parse_args():
   parser.add_argument(
       '--supplement',
       type=str,
-      default='base',
-      choices=['base', 'sequence', 'frequence', 'similarity', 'tmix', 'fmix', 'linear'],
+      default='tsmixer',
+      choices=['base', 'FAM', 'EPAM', 'similarity', 'tmix', 'fmix', 'linear'],
       help='Proposed Method',
   )
 
   args = parser.parse_args()
 
   tf.random.set_seed(args.seed)
-  np.random.seed()
+  np.random.seed(args.seed)
 
   return args
 
@@ -199,7 +201,12 @@ def parse_args():
 def main():
   args = parse_args()
   if 'tsmixer' in args.model:
-    exp_id = f'{args.data}_{args.feature_type}_{args.model}_sl{args.seq_len}_pl{args.pred_len}_lr{args.learning_rate}_nt{args.norm_type}_{args.activation}_nb{args.n_block}_dp{args.dropout}_fd{args.ff_dim}'
+    if 'base' in args.supplement:
+      exp_id = f'{args.data}_{args.feature_type}_{args.supplement}_sl{args.seq_len}_pl{args.pred_len}_lr{args.learning_rate}_nt{args.norm_type}_{args.activation}_nb{args.n_block}_dp{args.dropout}_fd{args.ff_dim}'
+    if 'FAM' in args.supplement:
+      exp_id = f'{args.data}_{args.feature_type}_{args.supplement}_sl{args.seq_len}_pl{args.pred_len}_lr{args.learning_rate}_nt{args.norm_type}_{args.activation}_nb{args.n_block}_dp{args.dropout}_fd{args.ff_dim}'
+    if 'EPAM' in args.supplement:
+      exp_id = f'{args.data}_{args.feature_type}_{args.supplement}_sl{args.seq_len}_pl{args.pred_len}_lr{args.learning_rate}_nt{args.norm_type}_{args.activation}_nb{args.n_block}_dp{args.dropout}_fd{args.ff_dim}'
   elif args.model == 'tmix_only':
     exp_id = f'{args.data}_{args.feature_type}_{args.model}_sl{args.seq_len}_pl{args.pred_len}_lr{args.learning_rate}_nt{args.norm_type}_{args.activation}_nb{args.n_block}_dp{args.dropout}_fd{args.ff_dim}'
   elif args.model == 'fmix_only':
@@ -228,15 +235,14 @@ def main():
 
   # train model
   if 'tsmixer' in args.model:
-    fourier, centers = utils.prepare_features(data_loader) if args.supplement != 'base' else ([], [])
-    # print(fourier)
+    fourier, centers = utils.prepare_features(data_loader, args.supplement) if args.supplement != 'base' else ([], [])
     model = TSMixer(
       input_shape=(args.seq_len, data_loader.n_feature),
       pred_len=args.pred_len,
       norm_type=args.norm_type,
       activation=args.activation,
-      dropout=args.dropout,
       n_block=args.n_block,
+      dropout=args.dropout,
       ff_dim=args.ff_dim,
       target_slice=data_loader.target_slice,
       proposed=args.supplement,
@@ -295,6 +301,7 @@ def main():
   optimizer = tf.keras.optimizers.Adam(learning_rate=args.learning_rate)
   model.compile(optimizer=optimizer, loss='mae', metrics=['mae'])
   checkpoint_path = os.path.join(args.checkpoint_dir, f'{exp_id}_best')
+  
   if args.training == 'train':
     checkpoint_callback = tf.keras.callbacks.ModelCheckpoint(
         filepath=checkpoint_path,
@@ -305,76 +312,48 @@ def main():
     early_stop_callback = tf.keras.callbacks.EarlyStopping(
         monitor='val_loss', patience=args.patience
     )
-    start_training_time = time.time()
-
-    # graph.plot_res_block_weights(model, f'graph/weights/{args.supplement}', args.data, args.pred_len, layer_name = 'temporal_linear', time_phase='before')
-    # graph.plot_res_block_weights(model, f'graph/weights/{args.supplement}', args.data, args.pred_len, layer_name = 'feature_linear1', time_phase='before')
-    # graph.plot_res_block_weights(model, f'graph/weights/{args.supplement}', args.data, args.pred_len, layer_name = 'feature_linear2', time_phase='before')
-
-
+    start_training_time = time.perf_counter()
     history = model.fit(
         train_data,
         epochs=args.train_epochs,
         validation_data=val_data,
         callbacks=[checkpoint_callback, early_stop_callback],
     )
+    end_training_time = time.perf_counter()
+    elasped_training_time = (end_training_time - start_training_time) * 1000
+    print(f'Training finished in {elasped_training_time:.2f} milliseconds')
 
-    end_training_time = time.time()
-    elasped_training_time = end_training_time - start_training_time
-    print(f'Training finished in {elasped_training_time} secconds')
+    # evaluate best model
+    best_epoch = np.argmin(history.history['val_loss']) 
 
-  # evaluate best model
-    best_epoch = np.argmin(history.history['val_loss'])
-
-
-#   for layer in model.layers:
-#     print(layer.summary())
-
-# 重みのプロット
-  # graph.plot_res_block_weights(model, f'graph/weights/{args.supplement}', args.data, args.pred_len, layer_name = 'temporal_linear', time_phase='after')
-  # graph.plot_res_block_weights(model, f'graph/weights/{args.supplement}', args.data, args.pred_len, layer_name = 'feature_linear1', time_phase='after')
-  # graph.plot_res_block_weights(model, f'graph/weights/{args.supplement}', args.data, args.pred_len, layer_name = 'feature_linear2', time_phase='after')
-  # graph.plot_last_dense_layer_weights(model, f'graph/weights/{args.supplement}', args.data, args.pred_len)
-
-  
-#   graph.history(history, save_path=f'graph/{args.supplement}/train_valid_{args.data}_{args.model}_{args.pred_len}_{args.supplement}.png')
-  
   model.load_weights(checkpoint_path)
-  graph.predictions_with_history(test_data, args.data, model, seq_len=args.seq_len, pred_len=args.pred_len, save_path=f'graph/{args.supplement}/{args.data}_{args.pred_len}/{args.supplement}')
-  # layer_names_all = ['input_1', 'rev_norm', 'batch_normalization', 'tf.compat.v1.transpose', 'dense', 'tf.compat.v1.transpose_1', 'dropout', 'tf.__operators__.add', 'feature_mixing_layer', 'batch_normalization_1', 'dense_1', 'dropout_1', 'dense_2', 'dropout_2', 'tf.__operators__.add_1', 'batch_normalization_2', 'tf.compat.v1.transpose_2', 'dense_3', 'tf.compat.v1.transpose_3', 'dropout_3', 'tf.__operators__.add_2', 'feature_mixing_layer_1', 'batch_normalization_3', 'dense_4', 'dropout_4', 'dense_5', 'dropout_5', 'tf.__operators__.add_3', 'batch_normalization_4', 'tf.compat.v1.transpose_4', 'dense_6', 'tf.compat.v1.transpose_5', 'dropout_6', 'tf.__operators__.add_4', 'feature_mixing_layer_2', 'batch_normalization_5', 'dense_7', 'dropout_7', 'dense_8', 'dropout_8', 'tf.__operators__.add_5', 'batch_normalization_6', 'tf.compat.v1.transpose_6', 'dense_9', 'tf.compat.v1.transpose_7', 'dropout_9', 'tf.__operators__.add_6', 'feature_mixing_layer_3', 'batch_normalization_7', 'dense_10', 'dropout_10', 'dense_11', 'dropout_11', 'tf.__operators__.add_7', 'batch_normalization_8', 'tf.compat.v1.transpose_8', 'dense_12', 'tf.compat.v1.transpose_9', 'dropout_12', 'tf.__operators__.add_8', 'feature_mixing_layer_4', 'batch_normalization_9', 'dense_13', 'dropout_13', 'dense_14', 'dropout_14', 'tf.__operators__.add_9', 'batch_normalization_10', 'tf.compat.v1.transpose_10', 'dense_15', 'tf.compat.v1.transpose_11', 'dropout_15', 'tf.__operators__.add_10', 'feature_mixing_layer_5', 'batch_normalization_11', 'dense_16', 'dropout_16', 'dense_17', 'dropout_17', 'tf.__operators__.add_11', 'tf.__operators__.getitem', 'tf.compat.v1.transpose_12', 'dense_18', 'tf.compat.v1.transpose_13']
-#   layer_names = ['input_1', 'batch_normalization']
-#   layer_names.append(model.layers[-1].name)
-#   for layer in model.layers:
-#       if layer.name.startswith('tf.__operators'):
-#           layer_names.append(layer.name)
-#   plot_callback = PlotLayerOutputCallback(layer_names=layer_names, test_data=test_data)
-#   test_result = model.evaluate(test_data, callbacks=[plot_callback])
-
-  # ResBlockの名前を取得
-  # res_block_names = [layer.name for layer in model.layers if 'res_block' in layer.name]
-
-  # テストデータでモデルを評価し、入出力をプロット
-  # res_block_io_callback = ResBlockIOCallback(model, test_data, res_block_names, f'graph/{args.supplement}/{args.data}_{args.pred_len}')
-
   test_result = model.evaluate(test_data)
-  model.summary()
-
-  # graph.plot_mse_per_time_step(model, test_data, args.pred_len, args.supplement, f'graph/{args.supplement}/{args.data}_{args.pred_len}/mse_per_time_step.png')
-
-
   if args.delete_checkpoint:
     for f in glob.glob(checkpoint_path + '*'):
       os.remove(f)
 
+  # graph.history(history, save_path=f'graph/{args.supplement}/train_valid_{args.data}_{args.model}_{args.pred_len}_{args.supplement}.png') 
+  # graph.predictions_with_history(test_data, args.data, model, seq_len=args.seq_len, pred_len=args.pred_len, save_path=f'graph/{args.supplement}/{args.data}_{args.pred_len}/{args.supplement}')
+  # graph.plot_mse_per_time_step(model, test_data, args.pred_len, args.supplement, f'graph/{args.supplement}/{args.data}_{args.pred_len}/mse_per_time_step.png')
+
   # save result to csv
   data = {
       'data': [args.data],
-      'supplement': [args.supplement],
+      'model': [args.model],
+      'seq_len': [args.seq_len],
       'pred_len': [args.pred_len],
-      'mae': [test_result[0]],
-      # 'val_mse': [history.history['val_loss'][best_epoch]],
-      # 'train_mse': [history.history['loss'][best_epoch]],
-      # 'training_time': elasped_training_time,
+      'lr': [args.learning_rate],
+      'mse': [test_result[0]],
+      'mae': [test_result[1]],
+      'val_mse': [history.history['val_loss'][best_epoch]],
+      'val_mae': [history.history['val_mae'][best_epoch]],
+      'train_mse': [history.history['loss'][best_epoch]],
+      'train_mae': [history.history['mae'][best_epoch]],
+      'training_time': elasped_training_time,
+      'norm_type': args.norm_type,
+      'activation': args.activation,
+      'n_block': args.n_block,
+      'dropout': args.dropout,
   }
   if 'TSMixer' in args.model:
     data['ff_dim'] = args.ff_dim

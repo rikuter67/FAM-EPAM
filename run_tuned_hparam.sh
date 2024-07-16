@@ -1,8 +1,7 @@
 export CUDA_VISIBLE_DEVICES=1
 
 # データセットと予測長の配列
-# datasets=("ETTh1" "ETTh2" "ETTm1" "ETTm2" "weather" "electricity" "traffic")
-datasets=("ETTh1")
+datasets=("ETTh1" "ETTh2" "ETTm1" "ETTm2" "weather" "electricity" "traffic")
 predict_lengths=(96 192 336 720)
 seq_len=512
 
@@ -72,17 +71,16 @@ get_hparams() {
 }
 
 # 各データセットと予測長に対する実験の実行
-num=1
-for i in $(seq 1 $num); do
-    for data in "${datasets[@]}"; do
-        for pred_len in "${predict_lengths[@]}"; do
-            # ハイパーパラメータの取得
-            read -r learning_rate n_block dropout ff_dim <<< $(get_hparams $data $pred_len)
+for data in "${datasets[@]}"; do
+    for pred_len in "${predict_lengths[@]}"; do
+        # ハイパーパラメータの取得
+        read -r learning_rate n_block dropout ff_dim <<< $(get_hparams $data $pred_len)
 
+        for supplement in 'base'; do
             # 実行コマンドの生成と実行
-            python run.py --model tsmixer_rev_in --training test --supplement 'similarity' --data $data --seq_len $seq_len --pred_len $pred_len --learning_rate $learning_rate --n_block $n_block --dropout $dropout --ff_dim $ff_dim --seed 0
+            python run.py --model tsmixer_rev_in --training train --supplement FAM --data $data --seq_len $seq_len --pred_len $pred_len --learning_rate $learning_rate --n_block $n_block --dropout $dropout --ff_dim $ff_dim --seed 0
             echo "Running command: $cmd"
-            # $cmd
+            eval $cmd
         done
     done
 done

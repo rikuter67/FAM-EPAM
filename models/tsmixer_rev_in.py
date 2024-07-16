@@ -19,7 +19,6 @@ from models.rev_in import RevNorm
 from models.tsmixer import ResBlock
 from tensorflow.keras import layers
 import tensorflow as tf
-import pdb
 
 class TSMixer(tf.keras.Model):
     def __init__(self, input_shape, pred_len, norm_type, activation, n_block, dropout, ff_dim, target_slice, proposed, centers, fourier):
@@ -65,11 +64,8 @@ class Supplement(layers.Layer):
         self.fourier_features = fourier
         self.num_lines = 5
 
-        # 学習可能なフーリエパラメータの初期化
-        self.fourier_params = self._initialize_fourier_parameters()
-
-        self.inclination = self._initialize_parameter([0, -1, 1, -2, 2], 'inclination')
-        self.bias = self._initialize_parameter([0, 0, 0, 0, 0], 'bias')
+        if fourier is not None:
+            self.fourier_params = self._initialize_fourier_parameters()
 
     def _initialize_parameter(self, initial_values, name):
         return self.add_weight(
@@ -111,25 +107,12 @@ class Supplement(layers.Layer):
     def calculate_similarity(self, inputs):
         return tf.matmul(inputs, self.centers, transpose_b=True)
 
-    def generate_line_index(self, batch_size):
-        line_index = []
-        for i in range(self.num_lines):
-            x = tf.linspace(0.0, 1.0, self.length)  # 正規化された時間スケール
-            line = self.inclination[i] * x + self.bias[i]
-            line_index.append(tf.reshape(line, (1, self.length, 1)))
-
-        line_index = tf.concat(line_index, axis=-1)  # 全ての直線を結合
-        return tf.tile(line_index, [batch_size, 1, 1])
-
     def call(self, inputs, supplement, centers, fourier):
         batch_size = tf.shape(inputs)[0]
-        if supplement == "sequence":
-            return self.generate_line_index(batch_size)
-
-        elif supplement == "frequence":
+        if supplement == "FAM":
             return self.generate_fourier_index(batch_size)
 
-        elif supplement == "similarity":
+        elif supplement == "EPAM":
             return tf.matmul(inputs, self.centers, transpose_b=True)
 
         else:
