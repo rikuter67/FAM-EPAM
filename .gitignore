@@ -10,3 +10,5 @@ graph/
 models/__pycache__/
 result.csv
 model.png
+
+pic/-/
