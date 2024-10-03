@@ -12,7 +12,7 @@
 
 The following images provide visual representations of the TSMixer model, as well as the EPAM and FAM components.
 
-![TSMixer Model](https://github.com/rikuter67/EPAM_and_FAM_FeatureMixing_TSMixer/pic/TSMixer.pdf)
+![TSMixer Model](/data2/yamazono/research/tsmixer_subclass/pic/TSMixer.pdf)
 *Figure 1: The architecture of the baseline TSMixer model.*
 
 ![EPAM](https://github.com/rikuter67/EPAM_and_FAM_FeatureMixing_TSMixer/pic/epam.png)
