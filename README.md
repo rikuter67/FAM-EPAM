@@ -12,13 +12,13 @@
 
 The following images provide visual representations of the TSMixer model, as well as the EPAM and FAM components.
 
-![TSMixer Model](/data2/yamazono/research/tsmixer_subclass/pic/TSMixer.pdf)
+![TSMixer Model](https://github.com/user-attachments/files/17268226/TSMixer.pdf)
 *Figure 1: The architecture of the baseline TSMixer model.*
 
-![EPAM](https://github.com/rikuter67/EPAM_and_FAM_FeatureMixing_TSMixer/pic/epam.png)
+![EPAM](https://github.com/user-attachments/files/17268223/EPAM.pdf)
 *Figure 2: The structure of the Event Proximity-Aware Mixer (EPAM).*
 
-![FAM](https://github.com/rikuter67/EPAM_and_FAM_FeatureMixing_TSMixer/pic/fam.png)
+![FAM](https://github.com/user-attachments/files/17268224/FAM.pdf)
 *Figure 3: The structure of the Frequency-Aware Mixer (FAM).*
 
 
@@ -28,14 +28,14 @@ The following images provide visual representations of the TSMixer model, as wel
 
 The enhanced TSMixer model with FAM and EPAM demonstrates significant improvements in forecasting accuracy compared to the baseline TSMixer and other state-of-the-art models.
 
-![Performance Comparison](https://github.com/rikuter67/EPAM_and_FAM_FeatureMixing_TSMixer/main/pic/performance_comparison.png)
+![Performance Comparison](https://github.com/user-attachments/files/17268229/weather_Features_Pred_TSMixer.pdf)
 
 ### Visualizations
 
 The following visualizations illustrate the effectiveness of our enhanced feature mixing approach.
 
-![Visualization 1](https://github.com/rikuter67/EPAM_and_FAM_FeatureMixing_TSMixer/main/pic/visualization1.png)
-![Visualization 2](https://github.com/rikuter67/EPAM_and_FAM_FeatureMixing_TSMixer/main/pic/visualization2.png)
+![Visualization 1](https://github.com/user-attachments/files/17268227/weather_Features_Pred_%2BEPAM.pdf)
+![Visualization 2](https://github.com/user-attachments/files/17268228/weather_Features_Pred_%2BFAM.pdf)
 
 ## Running the Experiments
 
