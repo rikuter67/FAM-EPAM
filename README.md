@@ -143,7 +143,7 @@ We appreciate the following GitHub repos very much for the valuable code base an
 
 ## Contact
 
-If you have any questions or concerns, please contact us: s256279@wakayama-u.ac.jp or 先生のメールアドレス or submit an issue.
+If you have any questions or concerns, please contact us: s256279@wakayama-u.ac.jp submit an issue.
 
 ## Citation
 
